@@ -1,0 +1,5 @@
+models/
+models/*
+
+.history/
+.DS_Store
