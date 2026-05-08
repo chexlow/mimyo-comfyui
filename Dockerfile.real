@@ -1,0 +1,23 @@
+FROM runpod/worker-comfyui:5.8.5-base
+
+# install custom nodes using comfy-cli
+RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui
+
+# Pre-cache Depth Anything Base weights so cold-start workers don't re-download from HF
+RUN python -c "from transformers import AutoImageProcessor, AutoModelForDepthEstimation; \
+    AutoImageProcessor.from_pretrained('LiheYoung/depth-anything-base-hf'); \
+    AutoModelForDepthEstimation.from_pretrained('LiheYoung/depth-anything-base-hf')"
+
+COPY models/new/diffusion_models /comfyui/models/diffusion_models/
+COPY models/new/loras/ /comfyui/models/loras/
+COPY models/new/model_patches/ /comfyui/models/model_patches/
+COPY models/new/text_encoders/ /comfyui/models/text_encoders/
+COPY models/new/upscale_models/ /comfyui/models/upscale_models/
+COPY models/new/vae/ /comfyui/models/vae/
+
+COPY src/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Copy local static input files into the ComfyUI input directory (delete if not needed)
+# Assumes you have an 'input' folder next to your Dockerfile
+COPY input/ /comfyui/input/

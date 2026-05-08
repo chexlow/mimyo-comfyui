@@ -1,0 +1,15 @@
+{
+  "display_name": "Aria (fictional)",
+  "real_name": null,
+  "sources": [
+    {
+      "type": "synthetic_generated",
+      "tool": "z-image-turbo",
+      "session": "session-a",
+      "date": "2026-05-04",
+      "notes": "anchor portrait + scene variants generated locally"
+    }
+  ],
+  "collection_notes": "All raws generated via local synthetic pipeline. No real-person photos were used. Sessions are organised by <session-tag> appearing in raw/<seq>_<session-tag>.<ext>.",
+  "rights_notes": "Synthetic subject — no third-party rights involved. License kept at internal_only by default until an explicit release decision is made."
+}

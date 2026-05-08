@@ -1,0 +1,21 @@
+FROM runpod/worker-comfyui:5.6.0-base
+
+# install custom nodes using comfy-cli
+RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui
+
+COPY models/anime/checkpoints/ /comfyui/models/checkpoints/
+COPY models/anime/controlnet/ /comfyui/models/controlnet/
+COPY models/anime/loras/ /comfyui/models/loras/
+COPY models/anime/text_encoders/ /comfyui/models/text_encoders/
+COPY models/anime/unet/ /comfyui/models/unet/
+COPY models/anime/ultralytics/ /comfyui/models/ultralytics/
+COPY models/anime/sams/ /comfyui/models/sams/
+COPY models/anime/upscale_models/ /comfyui/models/upscale_models/
+COPY models/anime/vae/ /comfyui/models/vae/
+
+COPY src/start.sh /start.sh
+RUN chmod +x /start.sh
+
+# Copy local static input files into the ComfyUI input directory (delete if not needed)
+# Assumes you have an 'input' folder next to your Dockerfile
+COPY input/ /comfyui/input/

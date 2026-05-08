@@ -3,3 +3,34 @@ models/*
 
 .history/
 .DS_Store
+
+# Datasets — 이미지 본체와 private 메타는 git 에서 제외
+datasets/**/raw/*
+!datasets/**/raw/.gitkeep
+datasets/**/curated/*
+!datasets/**/curated/.gitkeep
+datasets/**/captions.jsonl
+datasets/**/manifest.private.json
+
+# 단, `_example/` 디렉토리는 reference layout 이라 모두 git 추적
+!datasets/**/_example/
+!datasets/**/_example/**
+
+# Inbox — 떨궈놓은 원본 이미지 / 거부 컷 / 큐레이션 리포트는 git 제외
+datasets/**/_inbox/*
+!datasets/**/_inbox/.gitkeep
+datasets/**/_curation_report.json
+
+# Curate scripts 가상환경
+datasets/_scripts/curate/.venv/
+datasets/_scripts/curate/__pycache__/
+datasets/_scripts/curate/**/__pycache__/
+
+# Trainer — 로컬 dryrun / 베이스 캐시 / 시크릿 / dirty config
+trainer/runs/
+trainer/.env
+trainer/.env.*
+!trainer/.env.example
+trainer/runtime-config.yaml
+.idea/
+workflows/

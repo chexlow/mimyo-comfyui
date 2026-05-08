@@ -1,0 +1,11 @@
+{
+  "subjects": [
+    {
+      "slug": "synth_aria",
+      "type": "face",
+      "subject_class": "synthetic",
+      "latest_version": "v1",
+      "trigger_token": "m1my0_aria"
+    }
+  ]
+}

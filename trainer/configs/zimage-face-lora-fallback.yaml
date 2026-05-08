@@ -1,0 +1,66 @@
+# Fallback — LoKr 호환성 실패 시 표준 LoRA 경로 (rank 16).
+# ComfyUI / diffusers 에서 Z-Image LoRA 로딩이 검증된 안전한 경로.
+
+job: extension
+config:
+  name: ${RUN_ID}
+  process:
+    - type: sd_trainer
+      training_folder: ${OUTPUT_DIR}
+      sqlite_db_path: ${OUTPUT_DIR}/runs.db
+      device: cuda:0
+      trigger_word: ${TRIGGER_TOKEN}
+
+      network:
+        type: lora
+        linear: 16
+        linear_alpha: 16
+
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 6
+        push_to_hub: false
+
+      datasets:
+        - folder_path: ${DATASET_DIR}
+          caption_ext: txt
+          caption_dropout_rate: 0.05
+          shuffle_tokens: false
+          cache_latents_to_disk: true
+          resolution: [1024, 1280]
+
+      train:
+        batch_size: 1
+        steps: 3000
+        gradient_accumulation_steps: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: flowmatch
+        optimizer: adamw8bit
+        lr: 1e-4
+        ema_config:
+          use_ema: true
+          ema_decay: 0.99
+        dtype: bf16
+
+      model:
+        name_or_path: ${BASE_DIR}
+        is_flux: false
+        quantize: true
+        quantize_te: true
+
+      sample:
+        sampler: flowmatch
+        sample_every: 250
+        width: 1024
+        height: 1024
+        prompts:
+          - "${TRIGGER_TOKEN}, head and shoulders portrait, plain white t-shirt, soft natural light, neutral background, looking at camera"
+          - "${TRIGGER_TOKEN}, three-quarter view, beige knit cardigan over a white blouse, sitting at a wooden cafe table by a window, warm afternoon light, slight smile"
+        neg: ""
+        seed: 42
+        walk_seed: false
+        guidance_scale: 1.0
+        sample_steps: 24

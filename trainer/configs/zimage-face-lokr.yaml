@@ -1,0 +1,69 @@
+# 본 sweep — face LoKr (factor 8, dim 32, full_rank).
+# Base 학습 → Turbo 추론 패턴 가정. 250 step 마다 checkpoint + sample.
+
+job: extension
+config:
+  name: ${RUN_ID}
+  process:
+    - type: sd_trainer
+      training_folder: ${OUTPUT_DIR}
+      sqlite_db_path: ${OUTPUT_DIR}/runs.db
+      device: cuda:0
+      trigger_word: ${TRIGGER_TOKEN}
+
+      network:
+        type: lokr
+        lokr_full_rank: true
+        lokr_factor: 8
+        linear: 32
+        linear_alpha: 32
+
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 6
+        push_to_hub: false
+
+      datasets:
+        - folder_path: ${DATASET_DIR}
+          caption_ext: txt
+          caption_dropout_rate: 0.05
+          shuffle_tokens: false
+          cache_latents_to_disk: true
+          resolution: [1024, 1280]
+
+      train:
+        batch_size: 1
+        steps: 2500
+        gradient_accumulation_steps: 1
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: flowmatch
+        optimizer: adamw8bit
+        lr: 1e-4
+        ema_config:
+          use_ema: true
+          ema_decay: 0.99
+        dtype: bf16
+
+      model:
+        name_or_path: ${BASE_DIR}
+        is_flux: false
+        quantize: true
+        quantize_te: true
+
+      sample:
+        sampler: flowmatch
+        sample_every: 250
+        width: 1024
+        height: 1024
+        prompts:
+          - "${TRIGGER_TOKEN}, head and shoulders portrait, plain white t-shirt, soft natural light, neutral background, looking at camera"
+          - "${TRIGGER_TOKEN}, three-quarter view, beige knit cardigan over a white blouse, sitting at a wooden cafe table by a window, warm afternoon light, slight smile"
+          - "${TRIGGER_TOKEN}, full body side profile, dark blue denim jacket over a white tee, white wide-leg pants, standing on a paved walking path in a park, overcast daylight"
+        neg: ""
+        seed: 42
+        walk_seed: false
+        guidance_scale: 1.0
+        sample_steps: 24
