@@ -1,7 +1,15 @@
 FROM runpod/worker-comfyui:5.8.5-base
 
 # install custom nodes using comfy-cli
-RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui ComfyUI-Florence2
+RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui
+
+ARG FLORENCE2_NODE_REF="9ece3de914214c5f581d725167bc9d0eeb0d1120"
+RUN git clone https://github.com/kijai/ComfyUI-Florence2.git /comfyui/custom_nodes/ComfyUI-Florence2 \
+    && cd /comfyui/custom_nodes/ComfyUI-Florence2 \
+    && git checkout "${FLORENCE2_NODE_REF}" \
+    && python -m pip install --no-cache-dir -r requirements.txt \
+    && grep -q '"Florence2ModelLoader"' nodes.py \
+    && grep -q '"Florence2Run"' nodes.py
 
 # Pre-cache Depth Anything Base weights so cold-start workers don't re-download from HF
 RUN python -c "from transformers import AutoImageProcessor, AutoModelForDepthEstimation; \
