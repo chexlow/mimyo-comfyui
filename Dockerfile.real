@@ -1,7 +1,7 @@
 FROM runpod/worker-comfyui:5.8.5-base
 
 # install custom nodes using comfy-cli
-RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui
+RUN comfy-node-install comfyui_controlnet_aux comfyui_ultimatesdupscale comfyui-art-venture ComfyUI-GGUF rgthree-comfy mikey_nodes comfyui-kjnodes comfyui_ultimatesdupscale ComfyUI-Crystools comfyui-art-venture comfyui-easy-use comfyui_essentials comfyui-impact-pack comfyui-custom-scripts comfyui-impact-subpack comfyui-easy-use masquerade-nodes-comfyui ComfyUI-Florence2
 
 # Pre-cache Depth Anything Base weights so cold-start workers don't re-download from HF
 RUN python -c "from transformers import AutoImageProcessor, AutoModelForDepthEstimation; \
@@ -14,6 +14,10 @@ COPY models/new/model_patches/ /comfyui/models/model_patches/
 COPY models/new/text_encoders/ /comfyui/models/text_encoders/
 COPY models/new/upscale_models/ /comfyui/models/upscale_models/
 COPY models/new/vae/ /comfyui/models/vae/
+
+# ComfyUI-Florence2 loads local Florence models from /comfyui/models/LLM.
+# Keep these baked into the serverless image to avoid cold-start HF downloads.
+COPY models/new/LLM/ /comfyui/models/LLM/
 
 COPY src/start.sh /start.sh
 RUN chmod +x /start.sh

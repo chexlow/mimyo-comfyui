@@ -106,7 +106,8 @@ ENFORCE_EAGER=true
 
 Serverless endpoint가 뜬 뒤 RunPod endpoint base URL을 `ENDPOINT`로 넘깁니다.
 
-RunPod Serverless vLLM endpoint를 쓸 때는 endpoint base URL만 넘기면 됩니다. 스크립트가 `/openai/v1/chat/completions`를 자동으로 붙입니다.
+RunPod endpoint base URL을 넘기면 스크립트가 native `/run` job API로 요청을 넣고 `/status/{job_id}`를 polling합니다.
+이미지 캡션 요청은 `input.openai_route="/v1/chat/completions"`와 `input.openai_input={...}` 형태로 worker-vLLM OpenAI engine에 전달됩니다.
 
 ```bash
 RUNPOD_API_KEY="<runpod-api-key>" \
@@ -115,42 +116,47 @@ MODEL="qwen3-vl-caption-it" \
 ./vlm/qwen3-vl-caption-it/smoke.sh ./sample.webp
 ```
 
+직접 curl:
+
+```bash
+curl -X POST "https://api.runpod.ai/v2/<endpoint-id>/run" \
+  -H "Authorization: Bearer <runpod-api-key>" \
+  -H "Content-Type: application/json" \
+  --data '{
+    "input": {
+      "openai_route": "/v1/chat/completions",
+      "openai_input": {
+        "model": "qwen3-vl-caption-it",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Describe this image as a concise natural-language prompt for image generation."
+              },
+              {
+                "type": "image_url",
+                "image_url": {
+                  "url": "data:image/webp;base64,..."
+                }
+              }
+            ]
+          }
+        ],
+        "temperature": 0.2,
+        "max_tokens": 512
+      }
+    }
+  }'
+```
+
 Pod HTTP URL을 직접 열어둔 경우에는 기존 OpenAI-compatible path를 그대로 넘겨도 됩니다.
 
 ```bash
 ENDPOINT="https://<runpod-url>/v1/chat/completions" \
 MODEL="qwen3-vl-caption-it" \
 ./vlm/qwen3-vl-caption-it/smoke.sh ./sample.webp
-```
-
-직접 curl:
-
-```bash
-curl -X POST "https://api.runpod.ai/v2/<endpoint-id>/openai/v1/chat/completions" \
-  -H "Authorization: Bearer <runpod-api-key>" \
-  -H "Content-Type: application/json" \
-  --data '{
-    "model": "qwen3-vl-caption-it",
-    "messages": [
-      {
-        "role": "user",
-        "content": [
-          {
-            "type": "text",
-            "text": "Describe this image as a concise natural-language prompt for image generation. Focus on subject, pose, outfit, lighting, framing, background, and visual style."
-          },
-          {
-            "type": "image_url",
-            "image_url": {
-              "url": "data:image/webp;base64,..."
-            }
-          }
-        ]
-      }
-    ],
-    "temperature": 0.2,
-    "max_tokens": 512
-  }'
 ```
 
 ## App Integration Later
